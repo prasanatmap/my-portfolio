@@ -5,9 +5,6 @@ import Timeline from './components/Timeline';
 import { careerData } from './careerData'; 
 
 function App() {
-  // Pointing directly to public/coding-bg.mp4
-  const backgroundVideoUrl = '/coding-bg.mp4'; 
-
   const appStyle = {
     fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     color: '#ffffff',
@@ -17,18 +14,36 @@ function App() {
     margin: 0,
     padding: 0,
     overflowX: 'hidden',
-    backgroundColor: '#0a0a16', // Deep background fallback
+    backgroundColor: '#06060f', // Deep tech dark
   };
 
-  const videoBackgroundStyle = {
+  // Modern CSS-only dynamic glowing grid background
+  const animatedBgStyle = {
     position: 'fixed',
     top: 0,
     left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    filter: 'brightness(30%) contrast(120%) saturate(90%)', 
+    width: '100vw',
+    height: '100vh',
     zIndex: -1,
+    backgroundImage: `
+      linear-gradient(rgba(0, 188, 212, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 188, 212, 0.05) 1px, transparent 1px)
+    `,
+    backgroundSize: '40px 40px', // Creates a clean developer grid
+    backgroundPosition: 'center',
+    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.3))',
+  };
+
+  // Glowing tech ambient circles that create a radiant background layer
+  const glowingOrbStyle = {
+    position: 'fixed',
+    top: '20%',
+    left: '10%',
+    width: '450px',
+    height: '450px',
+    background: 'radial-gradient(circle, rgba(0, 188, 212, 0.12) 0%, transparent 70%)',
+    zIndex: -1,
+    pointerEvents: 'none',
   };
 
   const contentContainerStyle = {
@@ -41,21 +56,14 @@ function App() {
 
   return (
     <div style={appStyle}>
-      {/* Optimized Video element to bypass strict browser playback locks */}
-      <video 
-        style={videoBackgroundStyle} 
-        autoPlay 
-        loop 
-        muted 
-        className="video-bg"
-      >
-        <source src={backgroundVideoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      {/* 🚀 CSS Engine Background - Completely bypasses browser video blocks */}
+      <div style={animatedBgStyle}></div>
+      <div style={glowingOrbStyle}></div>
+      <div style={{...glowingOrbStyle, top: '60%', left: '60%', background: 'radial-gradient(circle, rgba(0, 188, 212, 0.08) 0%, transparent 70%)'}}></div>
 
       <div style={contentContainerStyle}>
         <Header />
-        <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '40px 0' }} />
+        <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '40px 0' }} />
         <Timeline data={careerData} />
       </div>
     </div>

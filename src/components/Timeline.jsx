@@ -9,7 +9,7 @@ function Timeline({ data }) {
     <section>
       {/* White main section header */}
       <h2 style={{ color: '#ffffff', borderBottom: `2px solid ${themeBlue}`, paddingBottom: '10px', marginBottom: '30px' }}>
-        Work & Education Timeline
+        Work Timeline
       </h2>
       
       {data.map((item) => (

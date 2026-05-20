@@ -2,14 +2,22 @@
 export const careerData = [
   {
     id: 1,
-    role: "Senior Software Consultant (Tech Lead)",
-    company: "Thoughtworks India Pvt. Ltd.",
-    duration: "03/2024 - Present",
-    description: "Serving as Tech Lead managing end-to-end delivery of financial loan products. Architecting internal AI agentic systems using GitHub Copilot and Claude to boost team efficiency by 25%. Leading legacy Salesforce migrations to custom, high-performance in-house finance architectures.",
+    role: "Senior Software Consultant",
+    company: "Equal Experts Pvt. Ltd.",
+    duration: "05/2026 - Present",
+    description: "For now started vibe coding and exploring benefits of utilizing AI.",
     skills: ["Java", "Spring Boot", "Microservices", "AI Agents", "Prompt Engineering", "Cloud Architecture"]
   },
   {
     id: 2,
+    role: "Senior Software Consultant",
+    company: "Thoughtworks India Pvt. Ltd.",
+    duration: "03/2024 - 05/2026",
+    description: "Serving as Tech Lead managing end-to-end delivery of financial loan products. Architecting internal AI agentic systems using GitHub Copilot and Claude to boost team efficiency by 25%. Leading legacy Salesforce migrations to custom, high-performance in-house finance architectures.",
+    skills: ["Java", "Spring Boot", "Microservices", "AI Agents", "Prompt Engineering", "Cloud Architecture"]
+  },
+  {
+    id: 3,
     role: "Senior Software Engineer",
     company: "IBM India Pvt. Ltd.",
     duration: "02/2021 - 03/2024",
@@ -17,7 +25,7 @@ export const careerData = [
     skills: ["Java", "Spring Boot", "Microservices", "PCF", "JUnit", "SQL", "Banking Security"]
   },
   {
-    id: 3,
+    id: 4,
     role: "Software Engineer",
     company: "AIE Software India Pvt. Ltd.",
     duration: "12/2019 - 02/2021",
@@ -25,7 +33,7 @@ export const careerData = [
     skills: ["Java", "E-commerce Architecture", "Search Services", "Batch Frameworks", "Data Migration"]
   },
   {
-    id: 4,
+    id: 5,
     role: "Software Engineer",
     company: "Tata Consultancy Services (TCS)",
     duration: "12/2017 - 12/2019",
