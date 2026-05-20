@@ -4,13 +4,13 @@ import React from 'react';
 function Header() {
   // Replace this with your actual LinkedIn profile URL
   const linkedinUrl = "https://www.linkedin.com/in/prasanatma-p-anvekar-aab440112";
-  
+
   // Format for WhatsApp API: https://wa.me/YOUR_PHONE_NUMBER (with country code, no spaces or '+' sign)
   // Using your number from the resume: 91738085922 (91 is India's country code)
   const whatsappUrl = "https://wa.me/919738085922?text=Hi%20Prasanatma,%20I%20saw%20your%20portfolio%20and%20wanted%20to%20connect!";
 
   // 🔗 Dynamically reference your photo from the public folder
-  const profileImgPath = `${import.meta.env.BASE_URL}profile.jpg`; 
+  const profileImgPath = `${import.meta.env.BASE_URL}profile.jpg`;
 
   // Modern Flexbox layouts for the header alignment
   const headerContainerStyle = {
@@ -53,13 +53,13 @@ function Header() {
   return (
     <div style={headerContainerStyle}>
       {/* 1. Profile Picture Element */}
-      <img 
-        src={profileImgPath} 
-        alt="Prasanatma P" 
+      <img
+        src={profileImgPath}
+        alt="Prasanatma P"
         style={avatarStyle}
         onError={(e) => {
           // Fallback if your photo isn't in the public folder yet
-          e.target.src = "https://via.placeholder.com/120"; 
+          e.target.src = "https://via.placeholder.com/120";
         }}
       />
 
@@ -78,23 +78,30 @@ function Header() {
         {/* 3. Action Connection Links Row */}
         <div>
           {/* LinkedIn Button */}
-          <a 
-            href={linkedinUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ ...buttonStyle, backgroundColor: '#0077b5', color: '#fff' }}
           >
             💼 Connect on LinkedIn
           </a>
 
           {/* WhatsApp Button */}
-          <a 
-            href={whatsappUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ ...buttonStyle, backgroundColor: '#25D366', color: '#fff' }}
           >
             💬 Chat on WhatsApp
+          </a>
+
+          <a
+            href="mailto:prasanatmaanvekar@gmail.com?subject=Opportunity%20via%20Portfolio"
+            style={{ ...buttonStyle, backgroundColor: '#ea4335', color: '#fff' }}
+          >
+            ✉️ Email Me
           </a>
         </div>
       </div>
