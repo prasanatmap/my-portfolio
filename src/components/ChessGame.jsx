@@ -7,7 +7,7 @@ function ChessGame() {
   const [board, setBoard] = useState(() => game.board());
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [status, setStatus] = useState("White's Turn");
-  const [isBotActive, setIsBotActive] = useState(false);
+  const [gameMode, setGameMode] = useState(null); // 'pvp' or 'ai'
 
   const pieceSymbols = {
     p: { w: '♙', b: '♟' }, r: { w: '♖', b: '♜' }, n: { w: '♘', b: '♞' },
@@ -28,27 +28,23 @@ function ChessGame() {
     if (engine.isCheckmate()) setStatus("⚠️ Checkmate! Game Over.");
     else if (engine.isDraw()) setStatus("🤝 Draw Match!");
     else if (engine.inCheck()) setStatus(`💥 Check! (${engine.turn() === 'w' ? 'White' : 'Black'}'s Turn)`);
-    else setStatus(`Current Turn: ${engine.turn() === 'w' ? 'White (You)' : 'Black (AI)'}`);
+    else setStatus(`Current Turn: ${engine.turn() === 'w' ? 'White' : gameMode === 'ai' ? 'Black (AI)' : 'Black'}`);
   };
 
-  // 🤖 AI Chess Logic Evaluator Loop
   useEffect(() => {
-    if (game.turn() === 'b' && isBotActive && !game.isCheckmate() && !game.isDraw()) {
+    if (gameMode === 'ai' && game.turn() === 'b' && !game.isCheckmate() && !game.isDraw()) {
       const timeout = setTimeout(() => {
         const moves = game.moves({ verbose: true });
         if (moves.length === 0) return;
 
-        // Piece value weights matrix mapping
         const weights = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 1000 };
         let topMove = moves[0];
         let highestScore = -Infinity;
 
-        // Evaluate all legal strategic variations
         for (let move of moves) {
           let score = 0;
           if (move.captured) score += weights[move.captured] * 10;
           
-          // Lookahead safety simulation
           const sim = new Chess(game.fen());
           sim.move(move);
           if (sim.isCheckmate()) score += 10000;
@@ -60,7 +56,6 @@ function ChessGame() {
           }
         }
 
-        // Execute the top calculated move
         const engineCopy = new Chess(game.fen());
         engineCopy.move(topMove);
         syncState(engineCopy);
@@ -68,10 +63,12 @@ function ChessGame() {
 
       return () => clearTimeout(timeout);
     }
-  }, [game, isBotActive]);
+  }, [game, gameMode]);
 
   const handleSquareClick = (row, col) => {
-    if (game.isCheckmate() || game.isDraw() || (game.turn() === 'b' && isBotActive)) return;
+    if (game.isCheckmate() || game.isDraw()) return;
+    if (gameMode === 'ai' && game.turn() === 'b') return; // Freeze clicking during AI turn
+    
     const squareName = getSquareName(row, col);
 
     if (selectedSquare === null) {
@@ -94,9 +91,26 @@ function ChessGame() {
     }
   };
 
+  const menuButtonStyle = {
+    padding: '12px 24px', margin: '10px', backgroundColor: '#00bcd4',
+    border: 'none', color: '#000', fontWeight: 'bold', borderRadius: '5px',
+    cursor: 'pointer', fontSize: '1rem', width: '200px'
+  };
+
+  if (!gameMode) {
+    return (
+      <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
+        <h3 style={{ color: '#00bcd4', marginBottom: '20px' }}>♟️ Chess Engine Setup ♟️</h3>
+        <p style={{ color: '#aaa', marginBottom: '20px' }}>Select opponent style:</p>
+        <button onClick={() => { setGameMode('pvp'); setStatus("White's Turn"); }} style={menuButtonStyle}>幕 Pass & Play (Local)</button>
+        <button onClick={() => { setGameMode('ai'); setStatus("White's Turn (vs AI)"); }} style={menuButtonStyle}>🤖 Play Against Bot AI</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ textAlign: 'center', color: '#fff' }}>
-      <h3 style={{ color: '#00bcd4', margin: '0 0 5px 0' }}>♟️ Click-to-Move Chess</h3>
+      <h3 style={{ color: '#00bcd4', margin: '0 0 5px 0' }}>♟️ Chess ({gameMode === 'ai' ? 'vs AI' : 'Local 2P'})</h3>
       <p style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '0.95rem' }}>{status}</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', maxWidth: '340px', margin: '0 auto 20px auto', border: '3px solid #333' }}>
@@ -116,12 +130,9 @@ function ChessGame() {
         }))}
       </div>
 
-      <div>
-        <button onClick={() => setIsBotActive(!isBotActive)} style={{ padding: '8px 16px', marginRight: '10px', backgroundColor: isBotActive ? '#ffc107' : '#00bcd4', border: 'none', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', color: '#000' }}>
-          {isBotActive ? "Deactivate AI" : "Activate AI Bot"}
-        </button>
-        <button onClick={() => syncState(new Chess())} style={{ padding: '8px 16px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>Reset</button>
-      </div>
+      <button onClick={() => { setGame(new Chess()); setBoard(new Chess().board()); setGameMode(null); }} style={{ padding: '8px 24px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
+        Exit to Menu
+      </button>
     </div>
   );
 }

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 
 function TicTacToe() {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true); // Player = X, AI = O
-  const [isBotMode, setIsBotMode] = useState(false);
+  const [isXNext, setIsXNext] = useState(true); 
+  const [gameMode, setGameMode] = useState(null); // null = choosing, 'pvp' = 2 Player, 'ai' = AI Bot
 
   const calculateWinner = (squares) => {
     const lines = [
@@ -24,12 +24,11 @@ function TicTacToe() {
   const winner = calculateWinner(board);
   const isDraw = !winner && board.every(square => square !== null);
 
-  // 🤖 The Unbeatable Minimax Recursive Search Engine
   const minimax = (squares, depth, isMaximizing) => {
     const currentWinner = calculateWinner(squares);
-    if (currentWinner === 'O') return 10 - depth; // AI wins
-    if (currentWinner === 'X') return depth - 10; // Player wins
-    if (squares.every(s => s !== null)) return 0;  // Draw
+    if (currentWinner === 'O') return 10 - depth;
+    if (currentWinner === 'X') return depth - 10;
+    if (squares.every(s => s !== null)) return 0;
 
     if (isMaximizing) {
       let bestScore = -Infinity;
@@ -56,9 +55,8 @@ function TicTacToe() {
     }
   };
 
-  // Automated trigger loop when it is the AI's turn
   useEffect(() => {
-    if (!isXNext && isBotMode && !winner && !isDraw) {
+    if (gameMode === 'ai' && !isXNext && !winner && !isDraw) {
       const timeout = setTimeout(() => {
         let bestScore = -Infinity;
         let bestMove = -1;
@@ -86,55 +84,56 @@ function TicTacToe() {
 
       return () => clearTimeout(timeout);
     }
-  }, [isXNext, isBotMode, board, winner, isDraw]);
+  }, [isXNext, gameMode, board, winner, isDraw]);
 
   const handleClick = (index) => {
-    if (board[index] || winner || isDraw || (!isXNext && isBotMode)) return;
+    if (board[index] || winner || isDraw) return;
+    if (gameMode === 'ai' && !isXNext) return; // Block clicking during AI turn
+
     const newBoard = [...board];
-    newBoard[index] = 'X'; // Human plays X
+    newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
-    setIsXNext(false);
+    setIsXNext(!isXNext);
   };
 
-  const resetGame = () => {
-    setBoard(Array(9).fill(null));
-    setIsXNext(true);
+  const menuButtonStyle = {
+    padding: '12px 24px', margin: '10px', backgroundColor: '#00bcd4',
+    border: 'none', color: '#000', fontWeight: 'bold', borderRadius: '5px',
+    cursor: 'pointer', fontSize: '1rem', width: '200px'
   };
+
+  // Render Selection Menu if no mode is chosen yet
+  if (!gameMode) {
+    return (
+      <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
+        <h3 style={{ color: '#00bcd4', marginBottom: '20px' }}>❌ Tic-Tac-Toe Setup ⭕</h3>
+        <p style={{ color: '#aaa', marginBottom: '20px' }}>Choose your match structure:</p>
+        <button onClick={() => setGameMode('pvp')} style={menuButtonStyle}>🎮 Pass & Play (2 Player)</button>
+        <button onClick={() => setGameMode('ai')} style={menuButtonStyle}>🤖 Challenge Unbeatable AI</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ textAlign: 'center', color: '#fff' }}>
-      <h3 style={{ color: '#00bcd4', marginBottom: '10px' }}>❌ Minimax Tic-Tac-Toe ⭕</h3>
-      
+      <h3 style={{ color: '#00bcd4', marginBottom: '10px' }}>❌ Tic-Tac-Toe ({gameMode === 'ai' ? 'vs AI' : 'Local 2P'}) ⭕</h3>
       <p style={{ fontSize: '0.95rem', marginBottom: '15px' }}>
-        {winner ? `Winner: ${winner}` : isDraw ? "It's a Draw!" : `Next Player: ${isXNext ? '❌ You' : '⭕ AI Engine'}`}
+        {winner ? `Winner: ${winner}` : isDraw ? "It's a Draw!" : `Next Player: ${isXNext ? '❌ (Player 1)' : gameMode === 'ai' ? '⭕ (AI Engine)' : '⭕ (Player 2)'}`}
       </p>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 80px)', gap: '8px', justifyContent: 'center', marginBottom: '20px'
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 80px)', gap: '8px', justifyContent: 'center', marginBottom: '20px' }}>
         {board.map((value, index) => (
-          <button
-            key={index}
-            onClick={() => handleClick(index)}
-            style={{
-              width: '80px', height: '80px', backgroundColor: 'rgba(0, 188, 212, 0.05)',
-              border: '2px solid #00bcd4', borderRadius: '8px', fontSize: '2rem',
-              color: value === 'X' ? '#25D366' : '#ffc107', fontWeight: 'bold', cursor: 'pointer'
-            }}
-          >
-            {value}
-          </button>
+          <button key={index} onClick={() => handleClick(index)} style={{
+            width: '80px', height: '80px', backgroundColor: 'rgba(0, 188, 212, 0.05)',
+            border: '2px solid #00bcd4', borderRadius: '8px', fontSize: '2rem',
+            color: value === 'X' ? '#25D366' : '#ffc107', fontWeight: 'bold', cursor: 'pointer'
+          }}>{value}</button>
         ))}
       </div>
 
-      <div>
-        <button onClick={() => setIsBotMode(!isBotMode)} style={{ padding: '8px 16px', marginRight: '10px', backgroundColor: isBotMode ? '#ffc107' : '#00bcd4', border: 'none', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', color: '#000' }}>
-          {isBotMode ? "Deactivate AI" : "Activate AI Bot"}
-        </button>
-        <button onClick={resetGame} style={{ padding: '8px 16px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
-          Restart
-        </button>
-      </div>
+      <button onClick={() => { setBoard(Array(9).fill(null)); setIsXNext(true); setGameMode(null); }} style={{ padding: '8px 24px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
+        Exit to Menu
+      </button>
     </div>
   );
 }

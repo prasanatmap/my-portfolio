@@ -6,22 +6,17 @@ const COLS = 7;
 
 function ConnectFour() {
   const [board, setBoard] = useState(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)));
-  const [isYellowTurn, setIsYellowTurn] = useState(true); // True = Player (Yellow), False = AI (Red)
+  const [isYellowTurn, setIsYellowTurn] = useState(true); 
   const [winner, setWinner] = useState(null);
-  const [isBotActive, setIsBotActive] = useState(false);
+  const [gameMode, setGameMode] = useState(null); // 'pvp' or 'ai'
 
   const checkLine = (a, b, c, d) => (a && a === b && a === c && a === d);
 
   const evaluateWinner = (grid) => {
-    // Horizontal Check
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS - 3; c++) if (checkLine(grid[r][c], grid[r][c+1], grid[r][c+2], grid[r][c+3])) return grid[r][c];
-    // Vertical Check
     for (let r = 0; r < ROWS - 3; r++) for (let c = 0; c < COLS; c++) if (checkLine(grid[r][c], grid[r+1][c], grid[r+2][c], grid[r+3][c])) return grid[r][c];
-    // Diagonal down-right
     for (let r = 0; r < ROWS - 3; r++) for (let c = 0; c < COLS - 3; c++) if (checkLine(grid[r][c], grid[r+1][c+1], grid[r+2][c+2], grid[r+3][c+3])) return grid[r][c];
-    // Diagonal up-right
     for (let r = 3; r < ROWS; r++) for (let c = 0; c < COLS - 3; c++) if (checkLine(grid[r][c], grid[r-1][c+1], grid[r-2][c+2], grid[r-3][c+3])) return grid[r][c];
-    
     return null;
   };
 
@@ -36,25 +31,27 @@ function ConnectFour() {
   };
 
   const handleColumnClick = (c) => {
-    if (winner || (!isYellowTurn && isBotActive)) return;
+    if (winner) return;
+    if (gameMode === 'ai' && !isYellowTurn) return; // Prevent clicking during AI turn
+
     let clone = board.map(row => [...row]);
-    if (executeGravityDrop(clone, c, '💛')) {
+    const color = isYellowTurn ? '💛' : '❤️';
+
+    if (executeGravityDrop(clone, c, color)) {
       const matchWinner = evaluateWinner(clone);
       setBoard(clone);
       if (matchWinner) setWinner(matchWinner);
-      else setIsYellowTurn(false);
+      else setIsYellowTurn(!isYellowTurn);
     }
   };
 
-  // 🤖 AI Defensive/Offensive Strategy Loop
   useEffect(() => {
-    if (isYellowTurn || winner || !isBotActive) return;
+    if (gameMode !== 'ai' || isYellowTurn || winner) return;
 
     const timeout = setTimeout(() => {
       let clone = board.map(row => [...row]);
       let targetColumn = -1;
 
-      // Rule 1: Check if AI can win on this move
       for (let c = 0; c < COLS; c++) {
         let sim = board.map(row => [...row]);
         if (executeGravityDrop(sim, c, '❤️') && evaluateWinner(sim) === '❤️') {
@@ -62,7 +59,6 @@ function ConnectFour() {
         }
       }
 
-      // Rule 2: Check if Human can win on next turn -> Block them
       if (targetColumn === -1) {
         for (let c = 0; c < COLS; c++) {
           let sim = board.map(row => [...row]);
@@ -72,7 +68,6 @@ function ConnectFour() {
         }
       }
 
-      // Fallback: Pick first available column
       if (targetColumn === -1) {
         let validCols = [];
         for (let c = 0; c < COLS; c++) if (!board[0][c]) validCols.push(c);
@@ -88,19 +83,30 @@ function ConnectFour() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [isYellowTurn, board, winner, isBotActive]);
+  }, [isYellowTurn, board, winner, gameMode]);
 
-  const resetGame = () => {
-    setBoard(Array(ROWS).fill(null).map(() => Array(COLS).fill(null)));
-    setIsYellowTurn(true);
-    setWinner(null);
+  const menuButtonStyle = {
+    padding: '12px 24px', margin: '10px', backgroundColor: '#00bcd4',
+    border: 'none', color: '#000', fontWeight: 'bold', borderRadius: '5px',
+    cursor: 'pointer', fontSize: '1rem', width: '200px'
   };
+
+  if (!gameMode) {
+    return (
+      <div style={{ textAlign: 'center', color: '#fff', padding: '20px' }}>
+        <h3 style={{ color: '#00bcd4', marginBottom: '20px' }}>🔵 Connect Four Setup 🔴</h3>
+        <p style={{ color: '#aaa', marginBottom: '20px' }}>Select mode configuration:</p>
+        <button onClick={() => setGameMode('pvp')} style={menuButtonStyle}>🎮 Pass & Play (2 Player)</button>
+        <button onClick={() => setGameMode('ai')} style={menuButtonStyle}>🤖 Play Against Bot AI</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ textAlign: 'center', color: '#fff' }}>
-      <h3 style={{ color: '#00bcd4', margin: '0 0 5px 0' }}>🔵 Connect Four (Gravity Engine)</h3>
+      <h3 style={{ color: '#00bcd4', margin: '0 0 5px 0' }}>🔵 Connect 4 ({gameMode === 'ai' ? 'vs AI' : 'Local 2P'})</h3>
       <p style={{ fontSize: '0.95rem', marginBottom: '15px' }}>
-        {winner ? <b style={{color: '#25D366'}}>Winner: {winner === '💛' ? 'You!' : 'AI Bot'}</b> : `Current Turn: ${isYellowTurn ? '💛 Yellow (You)' : '❤️ Red (AI Engine)'}`}
+        {winner ? <b style={{color: '#25D366'}}>Winner: {winner === '💛' ? 'Yellow' : 'Red'}</b> : `Current Turn: ${isYellowTurn ? '💛 Yellow' : gameMode === 'ai' ? '❤️ Red (AI)' : '❤️ Red'}`}
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', maxWidth: '320px', margin: '0 auto', padding: '10px', backgroundColor: '#0055ff', borderRadius: '8px' }}>
@@ -112,14 +118,9 @@ function ConnectFour() {
         )))}
       </div>
 
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => setIsBotActive(!isBotActive)} style={{ padding: '8px 16px', marginRight: '10px', backgroundColor: isBotActive ? '#ffc107' : '#00bcd4', border: 'none', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
-          {isBotActive ? "Disable Bot AI" : "Enable Bot AI Mode"}
-        </button>
-        <button onClick={resetGame} style={{ padding: '8px 16px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
-          Reset
-        </button>
-      </div>
+      <button onClick={() => { setBoard(Array(ROWS).fill(null).map(() => Array(COLS).fill(null))); setIsYellowTurn(true); setWinner(null); setGameMode(null); }} style={{ padding: '8px 24px', backgroundColor: '#dc3545', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', marginTop: '20px' }}>
+        Exit to Menu
+      </button>
     </div>
   );
 }
